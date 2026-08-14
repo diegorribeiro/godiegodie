@@ -42,6 +42,13 @@ export type ReplySubmitPayload = {
   text: string;
 };
 
+/** Who the fixed composer bar is currently replying to, and in which thread. */
+export type CommentComposerTarget = {
+  commentId: string;
+  authorId: string;
+  authorName: string;
+};
+
 export type TextStyleOverride = {
   /**
    * Name of a font already available to the app (a built-in system font,
@@ -100,15 +107,53 @@ export type GodiePostProps = {
    * array back down for the reply to actually appear.
    */
   onReplySubmit?: (payload: ReplySubmitPayload) => void;
+  /**
+   * Identity of the person using the composer (their own avatar/name, shown
+   * to the left of the fixed comment bar). The composer bar — and with it,
+   * the ability to comment or reply at all — only renders when this is
+   * provided; omit it to render GodiePost as read-only.
+   */
+  currentUser?: CommentAuthor;
+  /** Called when the user sends a brand-new top-level comment via the fixed composer bar. */
+  onCommentSubmit?: (text: string) => void;
+  /**
+   * Emoji shown in the quick-pick row above the composer while it's
+   * focused — tapping one appends it to the current text. Pass `[]` to hide
+   * the row entirely. Defaults to a small curated set.
+   */
+  composerEmojis?: string[];
   /** Gap between the media header and the comments list. Defaults to 12. */
   mediaCommentsGap?: number;
   /**
-   * Extra space left below the last comment, so it doesn't end up hidden
-   * behind a system bar (e.g. Android's persistent gesture/nav bar) or any
-   * other chrome the host renders below GodiePost. The component has no way
-   * to know about that chrome itself — measure it in your own app (typically
-   * `useSafeAreaInsets().bottom` from `react-native-safe-area-context`, if
-   * you already have it) and pass the number down.
+   * Extra space left below the very bottom of GodiePost (the composer bar
+   * when `currentUser` is set, otherwise the last comment), so it doesn't
+   * end up hidden behind a system bar (e.g. Android's persistent
+   * gesture/nav bar) or any other chrome the host renders below GodiePost.
+   * The component has no way to know about that chrome itself — measure it
+   * in your own app (typically `useSafeAreaInsets().bottom` from
+   * `react-native-safe-area-context`, if you already have it) and pass the
+   * number down.
    */
   commentsBottomInset?: number;
+  /**
+   * Background color used in light mode (device not in dark mode). Applies
+   * to the whole component — media letterboxing, the comments list, and the
+   * composer bar all share it, so the composer never looks like a
+   * different-colored patch floating over the rest. Defaults to white.
+   */
+  backgroundColor?: string;
+  /**
+   * Background color used when the device is in dark mode (detected via
+   * `useColorScheme()` — no setup needed). Defaults to the same near-black
+   * Instagram itself uses in dark mode. Text color isn't independently
+   * customizable yet — it's a simple black (light mode) / white (dark mode)
+   * split; ask if you need finer control.
+   */
+  backgroundColorDark?: string;
+  /**
+   * Dismiss the keyboard automatically after sending a comment or reply.
+   * Defaults to `true`. Pass `false` to keep the keyboard open after
+   * sending (e.g. for a host that expects rapid back-to-back comments).
+   */
+  closeOnSend?: boolean;
 };

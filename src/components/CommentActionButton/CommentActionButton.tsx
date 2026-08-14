@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { useGodieTheme } from '../../theme/GodieTheme';
 import type {
   Comment,
   CommentActionButton as CommentActionButtonType,
@@ -21,6 +22,7 @@ export function CommentActionButton({
   button,
   comment,
 }: CommentActionButtonProps) {
+  const theme = useGodieTheme();
   const dimension = DIMENSION_BY_SIZE[button.size ?? 'medium'];
 
   return (
@@ -31,12 +33,20 @@ export function CommentActionButton({
       accessibilityLabel={button.accessibilityLabel ?? button.label}
       style={[
         styles.button,
-        { width: dimension, height: dimension, borderRadius: dimension / 2 },
+        {
+          width: dimension,
+          height: dimension,
+          borderRadius: dimension / 2,
+          backgroundColor: theme.isDark ? 'rgba(255,255,255,0.15)' : '#f0f0f0',
+        },
       ]}
     >
       {button.icon}
       {button.label != null && (
-        <Text style={styles.label} numberOfLines={1}>
+        <Text
+          style={[styles.label, { color: theme.textColor }]}
+          numberOfLines={1}
+        >
           {button.label}
         </Text>
       )}
@@ -48,7 +58,6 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
   },
   label: {
     fontSize: 10,

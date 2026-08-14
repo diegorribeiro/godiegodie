@@ -1,53 +1,37 @@
-import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../Avatar';
 import { CommentTimestamp } from '../CommentTimestamp';
 import { CommentActionArea } from '../CommentActionArea';
 import { ReplyTrigger } from '../ReplyTrigger';
-import { CommentReplyComposer } from '../CommentReplyComposer';
 import { RepliesSection } from '../RepliesSection';
 import { textStyleOverride } from '../../utils/textStyleOverride';
+import { useGodieTheme } from '../../theme/GodieTheme';
 import type {
   Comment,
   CommentActionsConfig,
+  CommentComposerTarget,
   CommentTypography,
-  ReplySubmitPayload,
 } from '../../types';
 
 export type CommentItemProps = {
   comment: Comment;
   typography?: CommentTypography;
   actions?: CommentActionsConfig;
-  onReplySubmit?: (payload: ReplySubmitPayload) => void;
+  onReplyRequested: (target: CommentComposerTarget) => void;
 };
-
-type ReplyTargetState = { authorId: string; authorName: string } | null;
 
 export function CommentItem({
   comment,
   typography,
   actions,
-  onReplySubmit,
+  onReplyRequested,
 }: CommentItemProps) {
-  const [replyTarget, setReplyTarget] = useState<ReplyTargetState>(null);
-
+  const theme = useGodieTheme();
   const buttons = actions
     ? typeof actions.buttons === 'function'
       ? actions.buttons(comment)
       : actions.buttons
     : [];
-
-  function handleReplySubmit(text: string) {
-    if (!replyTarget) {
-      return;
-    }
-    onReplySubmit?.({
-      commentId: comment.id,
-      replyingToUserId: replyTarget.authorId,
-      text,
-    });
-    setReplyTarget(null);
-  }
 
   return (
     <View style={styles.outer}>
@@ -58,6 +42,7 @@ export function CommentItem({
             <Text
               style={[
                 styles.name,
+                { color: theme.textColor },
                 ...textStyleOverride(typography?.authorName),
               ]}
             >
@@ -68,12 +53,19 @@ export function CommentItem({
               fontSize={typography?.timestamp?.fontSize}
             />
           </View>
-          <Text style={[styles.text, ...textStyleOverride(typography?.text)]}>
+          <Text
+            style={[
+              styles.text,
+              { color: theme.textColor },
+              ...textStyleOverride(typography?.text),
+            ]}
+          >
             {comment.text}
           </Text>
           <ReplyTrigger
             onPress={() =>
-              setReplyTarget({
+              onReplyRequested({
+                commentId: comment.id,
                 authorId: comment.author.id,
                 authorName: comment.author.name,
               })
@@ -87,22 +79,16 @@ export function CommentItem({
         />
       </View>
 
-      {replyTarget && (
-        <View style={styles.composerWrapper}>
-          <CommentReplyComposer
-            placeholder={`Reply to ${replyTarget.authorName}...`}
-            onSubmit={handleReplySubmit}
-            onCancel={() => setReplyTarget(null)}
-          />
-        </View>
-      )}
-
       {comment.replies != null && comment.replies.length > 0 && (
         <RepliesSection
           replies={comment.replies}
           typography={typography}
           onReplyToReply={(target) =>
-            setReplyTarget({ authorId: target.id, authorName: target.name })
+            onReplyRequested({
+              commentId: comment.id,
+              authorId: target.id,
+              authorName: target.name,
+            })
           }
         />
       )}
@@ -134,9 +120,5 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 13,
     marginTop: 2,
-  },
-  composerWrapper: {
-    marginLeft: 40,
-    marginTop: 6,
   },
 });

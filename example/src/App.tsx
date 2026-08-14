@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet } from 'react-native';
+import { Alert, SafeAreaView, StyleSheet, useColorScheme } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -9,10 +9,17 @@ import {
   type Comment,
   type CommentActionButton,
   type CommentActionsConfig,
+  type CommentAuthor,
   type CommentTypography,
   type MediaItem,
   type ReplySubmitPayload,
 } from 'godiegodie';
+
+const currentUser: CommentAuthor = {
+  id: 'me',
+  name: 'You',
+  avatarUri: 'https://picsum.photos/seed/godiegodie-me/200/200',
+};
 
 const now = Date.now();
 const MINUTE = 60_000;
@@ -162,6 +169,7 @@ function AppContent() {
   // chrome the host renders below it) — the host measures it and passes
   // the number down. See docs/ARCHITECTURE.md and README "Safe area".
   const insets = useSafeAreaInsets();
+  const isDark = useColorScheme() === 'dark';
   const [comments, setComments] = useState(initialComments);
 
   function handleReplySubmit({
@@ -180,7 +188,7 @@ function AppContent() {
             ...(comment.replies ?? []),
             {
               id: `reply-${Date.now()}`,
-              author: { id: 'me', name: 'You' },
+              author: currentUser,
               text,
               createdAt: Date.now(),
               replyingToAuthorId: replyingToUserId,
@@ -191,15 +199,34 @@ function AppContent() {
     );
   }
 
+  function handleCommentSubmit(text: string) {
+    setComments((current) => [
+      ...current,
+      {
+        id: `comment-${Date.now()}`,
+        author: currentUser,
+        text,
+        createdAt: Date.now(),
+      },
+    ]);
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
       <GodiePost
         media={media}
         comments={comments}
         commentTypography={commentTypography}
         commentActions={commentActions}
+        currentUser={currentUser}
+        onCommentSubmit={handleCommentSubmit}
         onReplySubmit={handleReplySubmit}
         commentsBottomInset={insets.bottom}
+        // Omitting backgroundColor/backgroundColorDark on purpose — these
+        // match GodiePost's own tested defaults (white / Instagram-style
+        // near-black). Passed explicitly here only to show the prop exists:
+        // backgroundColor="#ffffff"
+        // backgroundColorDark="#000000"
       />
     </SafeAreaView>
   );
@@ -209,5 +236,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  containerDark: {
+    backgroundColor: '#000000',
   },
 });

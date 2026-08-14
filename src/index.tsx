@@ -6,6 +6,7 @@ export type {
   CommentAuthor,
   CommentReply,
   ReplySubmitPayload,
+  CommentComposerTarget,
   TextStyleOverride,
   CommentTypography,
   CommentActionButton,

@@ -1,17 +1,18 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { CommentItem } from '../CommentItem';
+import { useGodieTheme } from '../../theme/GodieTheme';
 import type {
   Comment,
   CommentActionsConfig,
+  CommentComposerTarget,
   CommentTypography,
-  ReplySubmitPayload,
 } from '../../types';
 
 export type CommentsListProps = {
   comments: Comment[];
   typography?: CommentTypography;
   actions?: CommentActionsConfig;
-  onReplySubmit?: (payload: ReplySubmitPayload) => void;
+  onReplyRequested: (target: CommentComposerTarget) => void;
   bottomInset?: number;
 };
 
@@ -19,9 +20,11 @@ export function CommentsList({
   comments,
   typography,
   actions,
-  onReplySubmit,
+  onReplyRequested,
   bottomInset,
 }: CommentsListProps) {
+  const theme = useGodieTheme();
+
   return (
     <FlatList
       data={comments}
@@ -31,14 +34,15 @@ export function CommentsList({
           comment={item}
           typography={typography}
           actions={actions}
-          onReplySubmit={onReplySubmit}
+          onReplyRequested={onReplyRequested}
         />
       )}
-      style={styles.list}
+      style={[styles.list, { backgroundColor: theme.backgroundColor }]}
       // Extra scroll room below the last row — see GodiePostProps.commentsBottomInset.
       // Applied to contentContainerStyle (not `style`), since padding there
       // becomes actual scrollable space rather than just shrinking the
-      // visible viewport.
+      // visible viewport. Only used when there's no composer bar below this
+      // list — the composer bar takes over the inset in that case.
       contentContainerStyle={
         bottomInset ? { paddingBottom: bottomInset } : undefined
       }
@@ -50,7 +54,9 @@ export function CommentsList({
       removeClippedSubviews={false}
       ListEmptyComponent={
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>No comments yet.</Text>
+          <Text style={[styles.emptyText, { color: theme.textColor }]}>
+            No comments yet.
+          </Text>
         </View>
       }
     />
@@ -66,7 +72,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#8e8e8e',
     fontSize: 13,
   },
 });
