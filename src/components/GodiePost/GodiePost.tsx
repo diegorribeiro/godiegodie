@@ -27,6 +27,8 @@ export function GodiePost({
   backgroundColor,
   backgroundColorDark,
   closeOnSend,
+  renderVideo,
+  isVisible = true,
 }: GodiePostProps) {
   const [replyTarget, setReplyTarget] = useState<CommentComposerTarget | null>(
     null
@@ -57,7 +59,11 @@ export function GodiePost({
       <View
         style={[styles.container, { backgroundColor: theme.backgroundColor }]}
       >
-        <MediaHeader media={media} />
+        <MediaHeader
+          media={media}
+          isVisible={isVisible}
+          renderVideo={renderVideo}
+        />
         <View style={[styles.commentsWrapper, { marginTop: mediaCommentsGap }]}>
           <CommentsList
             comments={comments}

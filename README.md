@@ -51,7 +51,29 @@ const media: MediaItem[] = [
 ];
 ```
 
-**Video does not play yet.** A `'video'` item currently renders as its `posterUri` image with a play-button icon overlaid — tapping it doesn't do anything yet. Picking a video library to wire up real playback (`expo-video` vs `react-native-video`) is a deliberate open decision — see `docs/ARCHITECTURE.md` — so budget for that if your use case needs actual video playback today.
+**Without `renderVideo`, a `'video'` item just renders its `posterUri` image with a play-button icon overlaid — no actual playback.** `godieGodie` doesn't bundle a video player itself (that's a real native dependency, and picking one is your call) — provide `renderVideo` and it's called for every video item instead, with an `isActive` flag telling you whether it should currently be playing:
+
+```tsx
+import Video from 'react-native-video'; // your own choice of player
+import type { RenderVideoContext, VideoMediaItem } from 'godiegodie';
+
+function renderVideo(item: VideoMediaItem, { isActive }: RenderVideoContext) {
+  return (
+    <Video
+      source={{ uri: item.uri }}
+      style={{ width: '100%', height: '100%' }}
+      resizeMode="cover"
+      paused={!isActive}
+    />
+  );
+}
+
+<GodiePost media={media} comments={comments} renderVideo={renderVideo} />;
+```
+
+`isActive` is the entire autopause mechanism — `godieGodie` never calls `.pause()`/`.stop()` on your player itself, it only ever changes this boolean (true only when the video is both the carousel's current page *and* the post itself is visible — see `isVisible` below), and your `renderVideo` function reacts however makes sense for whatever player you're using. Tested end-to-end against `react-native-video` — see [`example/src/VideoRenderer.tsx`](./example/src/VideoRenderer.tsx) for the reference implementation, and `docs/ROADMAP.md` for which other players are still on the list to try.
+
+If you're rendering a **feed of multiple posts**, pass `isVisible={false}` when your own list scrolls a post out of view (e.g. from `FlatList`'s `onViewableItemsChanged`) so its video stops even though `GodiePost` has no way to detect that on its own. Defaults to `true`, so a single standalone post doesn't need to think about this.
 
 ## Customizing comment typography
 
@@ -220,7 +242,7 @@ adb reverse tcp:8081 tcp:8081   # only needed over USB
 
 ## Docs
 
-See [`/docs`](./docs) for architecture and usage details.
+See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for how the component is built, and [`docs/ROADMAP.md`](./docs/ROADMAP.md) for what's planned but not finished yet (more video-player testing, "theater mode" comments).
 
 ## License
 

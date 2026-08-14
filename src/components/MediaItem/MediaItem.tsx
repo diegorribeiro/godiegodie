@@ -1,11 +1,27 @@
+import type { ReactNode } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import type { MediaItem as MediaItemType } from '../../types';
+import type {
+  MediaItem as MediaItemType,
+  RenderVideoContext,
+  VideoMediaItem,
+} from '../../types';
 
 export type MediaItemProps = {
   item: MediaItemType;
+  isActive: boolean;
+  renderVideo?: (
+    item: VideoMediaItem,
+    context: RenderVideoContext
+  ) => ReactNode;
 };
 
-export function MediaItem({ item }: MediaItemProps) {
+export function MediaItem({ item, isActive, renderVideo }: MediaItemProps) {
+  if (item.type === 'video' && renderVideo) {
+    return (
+      <View style={styles.container}>{renderVideo(item, { isActive })}</View>
+    );
+  }
+
   const uri = item.type === 'photo' ? item.uri : (item.posterUri ?? item.uri);
 
   return (

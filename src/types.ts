@@ -4,6 +4,19 @@ export type MediaItem =
   | { type: 'photo'; id: string; uri: string }
   | { type: 'video'; id: string; uri: string; posterUri?: string };
 
+export type VideoMediaItem = Extract<MediaItem, { type: 'video' }>;
+
+export type RenderVideoContext = {
+  /**
+   * True only when this specific video is both the carousel's current page
+   * *and* the whole post is visible (see `GodiePostProps.isVisible`).
+   * `godieGodie` never calls play/pause/stop on your player itself — this
+   * is the entire notification mechanism. React to it however suits your
+   * player (pause, stop, unmount, whatever "not active" means for you).
+   */
+  isActive: boolean;
+};
+
 export type CommentAuthor = {
   id: string;
   name: string;
@@ -156,4 +169,27 @@ export type GodiePostProps = {
    * sending (e.g. for a host that expects rapid back-to-back comments).
    */
   closeOnSend?: boolean;
+  /**
+   * Renders a video item yourself — `godieGodie` never bundles a video
+   * player (that's a real native dependency, and picking one is a decision
+   * only you can make for your app). Omit this and video items fall back
+   * to a static poster image with a play icon (no playback). Provide it
+   * and it's called for every `'video'` media item instead, with an
+   * `isActive` flag telling you whether it should currently be playing.
+   */
+  renderVideo?: (
+    item: VideoMediaItem,
+    context: RenderVideoContext
+  ) => ReactNode;
+  /**
+   * Whether this post is currently visible on screen in your own
+   * feed/list. `GodiePost` has no way to know this on its own — it doesn't
+   * own whatever scroll container it's rendered inside. Set it from your
+   * own list's visibility tracking (e.g. `FlatList`'s
+   * `onViewableItemsChanged`) if you're rendering a feed of posts and want
+   * a post's video to stop when the user scrolls to the next one. Defaults
+   * to `true`, so a single standalone post doesn't need to think about
+   * this at all.
+   */
+  isVisible?: boolean;
 };

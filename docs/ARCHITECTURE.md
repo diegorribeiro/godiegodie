@@ -21,8 +21,8 @@ Patterns worth keeping in mind:
 ```
 GodiePost                    (src/components/GodiePost) — owns replyTarget + composerHeight state
 ├── MediaHeader               fixed-aspect-ratio (1:1) top container
-│   └── MediaCarousel         horizontal pager + dots, tracks active index
-│       └── MediaItem         single photo, or video poster + play overlay
+│   └── MediaCarousel         horizontal pager + dots, computes per-item isActive
+│       └── MediaItem         photo, video poster+play fallback, or renderVideo(item, {isActive})
 ├── CommentsList               FlatList wrapper, empty state, reserves bottom room for the composer
 │   └── CommentItem            avatar + name/timestamp row + text + action area
 │       ├── Avatar             image or initials fallback
@@ -82,6 +82,25 @@ The whole component — media letterboxing, comments list, composer bar band —
 - **Why the composer band needed its own fix:** before this, `CommentComposerBar`'s outer container had no background (transparent), so it looked like a floating pill with comments scrolling visibly behind/around it. Real Instagram's comment bar sits on a solid band matching the screen's background, with no visible seam between "comments area" and "composer area." `CommentComposerBar` now reads the same theme via `useGodieTheme()` (no longer its own separate `useColorScheme()` call) and paints its root container with `theme.backgroundColor`, producing that same seamless look — confirmed on-device against a real Instagram dark-mode screenshot for comparison.
 - Any component that renders themed text or backgrounds calls `useGodieTheme()` directly; nothing above it in the tree needs to know or care.
 
+## Video rendering (`renderVideo`, `isVisible` props)
+Same render-slot pattern as everything host-owned in this library (`commentActions[].icon`, the donate-button example): `godieGodie` never imports a video-playback package — that's a real native dependency (linking, codecs, sometimes iOS background-audio entitlements), and picking one is a decision only the host can make. Full design rationale and the video-library landscape are in `docs/ROADMAP.md`; this section covers what's actually implemented.
+
+```ts
+export type VideoMediaItem = Extract<MediaItem, { type: 'video' }>;
+export type RenderVideoContext = { isActive: boolean };
+// on GodiePostProps:
+renderVideo?: (item: VideoMediaItem, context: RenderVideoContext) => ReactNode;
+isVisible?: boolean; // default true
+```
+- Omit `renderVideo`: unchanged fallback (poster image + inert play icon).
+- Provide it: `MediaItem` calls it for every `'video'` entry instead, passing `{ isActive }`.
+- **`isActive` is the entire pause/stop mechanism — deliberately not an imperative API.** `godieGodie` never calls `.pause()`/`.stop()`/anything on the host's player. It only ever changes a boolean; the host's `renderVideo` function re-renders with the new value and reacts however makes sense for whatever player it wraps (set a `paused` prop, call an imperative ref method, unmount — entirely up to the host). This was a deliberate choice over a callback-based API (`onPause`/`onStop` functions passed down): a reactive prop is idiomatic React, and avoids issues an imperative callback API would have (stale closures if the host's function reference changes, no single source of truth for current state). It's also strictly simpler to implement correctly on our side — we just compute one boolean per media item, nothing to invoke or track completion of.
+- **`isActive` combines two independent signals**, both required to be true:
+  1. *Carousel position* — `MediaCarousel` already tracked `activeIndex` internally (for the pagination dots) but never passed it to `MediaItem` before this — now it does, per-item: `isActive = isVisible && index === activeIndex`. Swiping to another slide automatically flips the outgoing video's `isActive` to `false`.
+  2. *Post-level visibility* — `isVisible` (top-level `GodiePostProps`, default `true`). `GodiePost` has no way to detect this itself — it doesn't own whatever scroll container it's rendered inside. A host rendering a *feed* of multiple posts (e.g. a `FlatList` of `GodiePost`) sets this from their own visibility tracking (`onViewableItemsChanged` is the standard RN pattern) so a post's video stops the moment the user scrolls to the next post, even though `GodiePost` itself never sees that outer list.
+- Threading: `GodiePost` → `MediaHeader` → `MediaCarousel` → `MediaItem`. Every intermediate component forwards `renderVideo`/`isVisible` (or the computed `isActive`) as plain props — no Context here, unlike the theme system, because these values are needed by exactly one thing at the bottom of a short, linear chain rather than scattered across many unrelated components.
+- **Reference implementation:** `example/src/VideoRenderer.tsx`, built against `react-native-video` (added only to `/example`'s own dependencies, never to the library). Sets the player's `paused` prop to `!isActive` — nothing more is required for correct autopause behavior with that library.
+
 ## Layout spacing and safe area (`mediaCommentsGap`, `commentsBottomInset` props)
 - `mediaCommentsGap` (default `12`) is a plain `marginTop` on the wrapper around `CommentsList` in `GodiePost`. Added after the media/comments boundary looked too tight by default — was `0` (no gap at all) before this.
 - `commentsBottomInset` is applied as `contentContainerStyle={{ paddingBottom }}` on `CommentsList`'s `FlatList`, **not** `style` padding — content-container padding becomes real scrollable space below the last row, whereas `style` padding just shrinks the visible viewport without letting the last item scroll clear of it.
@@ -96,7 +115,7 @@ The whole component — media letterboxing, comments list, composer bar band —
 - older: device-locale date (`Intl.DateTimeFormat`, no explicit locale/timeZone — resolves to the viewer's own device settings)
 
 ## Known gaps / open questions
-- **Video playback is not implemented yet.** `MediaItem` renders a video's poster image with a play-button overlay only — tapping it does not play anything yet. Picking a video library (e.g. `expo-video` vs `react-native-video`) is a real trade-off (Expo-only vs universal RN) that needs a decision before real playback is wired up.
+- **Video playback slot is implemented (`renderVideo`/`isVisible`, see above); only tested against one player so far (`react-native-video`).** Aspect-ratio behavior (vertical/square/horizontal video inside the fixed 1:1 container) and a couple more players still need testing — see `docs/ROADMAP.md` → "Phase 3" for the remaining checklist. Without `renderVideo`, the fallback is still just a poster image + inert play icon.
 - The top area's "toggle to informational blocks/forms" mode described in the original briefing is **not built yet** — v1 only covers the media (photo/video/carousel) case. `MediaHeader` is deliberately kept as a thin container so this can be added later without reshaping `MediaCarousel`.
 - Public prop API so far: `media`, `comments`, `commentTypography`, `commentActions`, `onReplySubmit`, `currentUser`, `onCommentSubmit`, `composerEmojis`, `mediaCommentsGap`, `commentsBottomInset`, `backgroundColor`, `backgroundColorDark`. No `onMediaPress`/media-level callbacks yet — add only when a real use case needs them.
 - The composer bar has no loading/error/pending state — `onCommentSubmit`/`onReplySubmit` are fire-and-forget from the component's point of view. If a host's backend call can fail, that's on the host to handle (e.g. show its own toast) since the component doesn't track submission status.
