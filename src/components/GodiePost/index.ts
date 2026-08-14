@@ -1,0 +1,1 @@
+export { GodiePost } from './GodiePost';

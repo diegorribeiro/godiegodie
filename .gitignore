@@ -1,0 +1,144 @@
+# =====================================================================
+# SECRETS / CREDENTIALS — never let these into a public repo
+# =====================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.p8
+*.jks
+*.mobileprovision
+*.keystore
+!debug.keystore
+credentials.json
+GoogleService-Info.plist
+google-services.json
+
+# =====================================================================
+# AI TOOL CONVERSATION / SESSION EXPORTS — must never be committed
+# (these can contain private chat history; some CLI tools auto-save
+# them straight into the project folder)
+# =====================================================================
+gemini-code-*.md
+claude-code-*.md
+*.chat.md
+.aider*
+.cursor/
+CLAUDE.local.md
+
+# Personal/local Claude Code settings (machine-specific permissions).
+***REMOVED***
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# =====================================================================
+# NODE / BUILD
+# =====================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+*.tsbuildinfo
+.turbo/
+jsconfig.json
+
+# react-native-builder-bob output
+lib/
+
+# Yarn Berry — commit the release binary/plugins, ignore local cache/state
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+example/vendor/
+
+# =====================================================================
+# REACT NATIVE (root + /example app)
+# =====================================================================
+.metro-health-check*
+dist/
+*.jsbundle
+
+# example/android and example/ios are real, committed native projects
+# (bare RN CLI app) — do NOT ignore them wholesale. Only their generated
+# build output, handled by the XCODE/COCOAPODS and ANDROID/GRADLE
+# sections below.
+ios/generated
+android/generated
+project.xcworkspace
+**/.xcode.env.local
+nitrogen/
+
+# =====================================================================
+# XCODE / COCOAPODS
+# =====================================================================
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+Pods/
+
+# =====================================================================
+# ANDROID / GRADLE
+# =====================================================================
+.gradle/
+.idea/
+*.iml
+android.iml
+*.hprof
+local.properties
+.cxx/
+.classpath
+.project
+.settings/
+android/app/libs
+android/keystores/debug.keystore
+
+# =====================================================================
+# TESTS / COVERAGE
+# =====================================================================
+coverage/
+.nyc_output/
+*.lcov
+
+# =====================================================================
+# OS / EDITOR
+# =====================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+.vscode/
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# =====================================================================
+# MISC
+# =====================================================================
+*.orig
+*.bak
+*.tmp
+.cache/
