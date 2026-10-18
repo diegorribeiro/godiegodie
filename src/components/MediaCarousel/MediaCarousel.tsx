@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import {
   FlatList,
@@ -8,13 +9,26 @@ import {
   type NativeScrollEvent,
 } from 'react-native';
 import { MediaItem } from '../MediaItem';
-import type { MediaItem as MediaItemType } from '../../types';
+import type {
+  MediaItem as MediaItemType,
+  RenderVideoContext,
+  VideoMediaItem,
+} from '../../types';
 
 export type MediaCarouselProps = {
   media: MediaItemType[];
+  isVisible: boolean;
+  renderVideo?: (
+    item: VideoMediaItem,
+    context: RenderVideoContext
+  ) => ReactNode;
 };
 
-export function MediaCarousel({ media }: MediaCarouselProps) {
+export function MediaCarousel({
+  media,
+  isVisible,
+  renderVideo,
+}: MediaCarouselProps) {
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -30,9 +44,13 @@ export function MediaCarousel({ media }: MediaCarouselProps) {
       <FlatList
         data={media}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={{ width }}>
-            <MediaItem item={item} />
+            <MediaItem
+              item={item}
+              isActive={isVisible && index === activeIndex}
+              renderVideo={renderVideo}
+            />
           </View>
         )}
         horizontal

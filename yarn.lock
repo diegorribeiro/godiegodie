@@ -5255,6 +5255,7 @@ __metadata:
     react-native-builder-bob: "npm:^0.41.0"
     react-native-monorepo-config: "npm:^0.4.0"
     react-native-safe-area-context: "npm:^5.9.0"
+    react-native-video: "npm:^6.19.2"
   languageName: unknown
   linkType: soft
 
@@ -7922,6 +7923,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/f8d7634b7ab114e21c88c87de044f2a5d94d3f9641c9c203e924733c014f0c8f5a4fd95fd70275b400e6696245a5d78b263635c0be175c882b02b723a580678e
+  languageName: node
+  linkType: hard
+
+"react-native-video@npm:^6.19.2":
+  version: 6.19.2
+  resolution: "react-native-video@npm:6.19.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/f5e06d4b38ebdbe082e344659deeb64f11e42567f5b89f48b9c6013118643b21687cea7b3f89f593ea77f3b32307423fcdfc26830d399eaa3335dafc16c4be5a
   languageName: node
   linkType: hard
 

@@ -1,15 +1,33 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MediaCarousel } from '../MediaCarousel';
-import type { MediaItem } from '../../types';
+import type {
+  MediaItem,
+  RenderVideoContext,
+  VideoMediaItem,
+} from '../../types';
 
 export type MediaHeaderProps = {
   media: MediaItem[];
+  isVisible: boolean;
+  renderVideo?: (
+    item: VideoMediaItem,
+    context: RenderVideoContext
+  ) => ReactNode;
 };
 
-export function MediaHeader({ media }: MediaHeaderProps) {
+export function MediaHeader({
+  media,
+  isVisible,
+  renderVideo,
+}: MediaHeaderProps) {
   return (
     <View style={styles.container}>
-      <MediaCarousel media={media} />
+      <MediaCarousel
+        media={media}
+        isVisible={isVisible}
+        renderVideo={renderVideo}
+      />
     </View>
   );
 }

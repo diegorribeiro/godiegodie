@@ -3,6 +3,7 @@ import { Avatar } from '../Avatar';
 import { CommentTimestamp } from '../CommentTimestamp';
 import { ReplyTrigger } from '../ReplyTrigger';
 import { textStyleOverride } from '../../utils/textStyleOverride';
+import { useGodieTheme } from '../../theme/GodieTheme';
 import type { CommentReply, CommentTypography } from '../../types';
 
 export type ReplyTarget = { id: string; name: string };
@@ -14,13 +15,19 @@ export type ReplyItemProps = {
 };
 
 export function ReplyItem({ reply, typography, onReplyPress }: ReplyItemProps) {
+  const theme = useGodieTheme();
+
   return (
     <View style={styles.container}>
       <Avatar name={reply.author.name} uri={reply.author.avatarUri} size={26} />
       <View style={styles.body}>
         <View style={styles.headerRow}>
           <Text
-            style={[styles.name, ...textStyleOverride(typography?.authorName)]}
+            style={[
+              styles.name,
+              { color: theme.textColor },
+              ...textStyleOverride(typography?.authorName),
+            ]}
           >
             {reply.author.name}
           </Text>
@@ -29,7 +36,13 @@ export function ReplyItem({ reply, typography, onReplyPress }: ReplyItemProps) {
             fontSize={typography?.timestamp?.fontSize}
           />
         </View>
-        <Text style={[styles.text, ...textStyleOverride(typography?.text)]}>
+        <Text
+          style={[
+            styles.text,
+            { color: theme.textColor },
+            ...textStyleOverride(typography?.text),
+          ]}
+        >
           {reply.text}
         </Text>
         <ReplyTrigger

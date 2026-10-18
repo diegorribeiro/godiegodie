@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  useColorScheme,
+} from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -9,10 +16,18 @@ import {
   type Comment,
   type CommentActionButton,
   type CommentActionsConfig,
+  type CommentAuthor,
   type CommentTypography,
   type MediaItem,
   type ReplySubmitPayload,
 } from 'godiegodie';
+import { VideoRenderer } from './VideoRenderer';
+
+const currentUser: CommentAuthor = {
+  id: 'me',
+  name: 'You',
+  avatarUri: 'https://picsum.photos/seed/godiegodie-me/200/200',
+};
 
 const now = Date.now();
 const MINUTE = 60_000;
@@ -33,7 +48,11 @@ const media: MediaItem[] = [
   {
     type: 'video',
     id: 'media-3',
-    uri: 'https://example.com/not-playable-yet.mp4',
+    // Google's own ExoPlayer test-media bucket — verified reachable (200)
+    // as of this writing, unlike some older public sample-video URLs
+    // (e.g. the old gtv-videos-bucket one, now 403). Horizontal (16:9),
+    // inside our fixed 1:1 media area (cover-fit crop).
+    uri: 'https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4',
     posterUri: 'https://picsum.photos/seed/godiegodie-3/800/800',
   },
 ];
@@ -162,7 +181,13 @@ function AppContent() {
   // chrome the host renders below it) — the host measures it and passes
   // the number down. See docs/ARCHITECTURE.md and README "Safe area".
   const insets = useSafeAreaInsets();
+  const isDark = useColorScheme() === 'dark';
   const [comments, setComments] = useState(initialComments);
+  // Stands in for "the host's own outer feed scrolled this post out of
+  // view" — in a real app this would come from a FlatList's
+  // onViewableItemsChanged, not a button. Here it's just the simplest way
+  // to prove GodiePostProps.isVisible actually stops the video.
+  const [isPostVisible, setIsPostVisible] = useState(true);
 
   function handleReplySubmit({
     commentId,
@@ -180,7 +205,7 @@ function AppContent() {
             ...(comment.replies ?? []),
             {
               id: `reply-${Date.now()}`,
-              author: { id: 'me', name: 'You' },
+              author: currentUser,
               text,
               createdAt: Date.now(),
               replyingToAuthorId: replyingToUserId,
@@ -191,15 +216,46 @@ function AppContent() {
     );
   }
 
+  function handleCommentSubmit(text: string) {
+    setComments((current) => [
+      ...current,
+      {
+        id: `comment-${Date.now()}`,
+        author: currentUser,
+        text,
+        createdAt: Date.now(),
+      },
+    ]);
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <Pressable
+        onPress={() => setIsPostVisible((current) => !current)}
+        style={[styles.visibilityToggle, { paddingTop: 8 + insets.top }]}
+      >
+        <Text style={styles.visibilityToggleText}>
+          {isPostVisible
+            ? '⬇ Simulate leaving post (pause video)'
+            : '⬆ Simulate returning to post'}
+        </Text>
+      </Pressable>
       <GodiePost
         media={media}
         comments={comments}
         commentTypography={commentTypography}
         commentActions={commentActions}
+        currentUser={currentUser}
+        onCommentSubmit={handleCommentSubmit}
         onReplySubmit={handleReplySubmit}
         commentsBottomInset={insets.bottom}
+        renderVideo={VideoRenderer}
+        isVisible={isPostVisible}
+        // Omitting backgroundColor/backgroundColorDark on purpose — these
+        // match GodiePost's own tested defaults (white / Instagram-style
+        // near-black). Passed explicitly here only to show the prop exists:
+        // backgroundColor="#ffffff"
+        // backgroundColorDark="#000000"
       />
     </SafeAreaView>
   );
@@ -209,5 +265,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  containerDark: {
+    backgroundColor: '#000000',
+  },
+  visibilityToggle: {
+    padding: 8,
+    backgroundColor: '#222222',
+    alignItems: 'center',
+  },
+  visibilityToggleText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

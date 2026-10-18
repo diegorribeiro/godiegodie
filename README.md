@@ -1,8 +1,10 @@
 # godieGodie
 
-A dynamic React Native component: a top area that toggles between media (photos/videos) and informational blocks/forms, plus a scrollable bottom area for comments or complementary content — similar in spirit to an Instagram post.
+A dynamic React Native component: a fixed media header (photo/video/carousel) plus a scrollable comments section below, with a fixed comment/reply composer bar — similar in spirit to an Instagram post.
 
 > 🚧 Work in progress — API not stable yet, not published to npm.
+>
+> A toggle between the media header and informational blocks/forms (mentioned in the original brief) is **not built yet** — v1 only covers the media case. See `docs/ARCHITECTURE.md` → "Known gaps" for the current state.
 
 ## Install
 
@@ -32,6 +34,46 @@ const comments: Comment[] = [
 ```
 
 See [`example/`](./example) for a runnable demo app, and [`/docs`](./docs) for architecture details.
+
+## Media
+
+`media` accepts one or more photos and videos, shown in a swipeable carousel (with pagination dots when there's more than one) at a fixed 1:1 aspect ratio:
+
+```tsx
+const media: MediaItem[] = [
+  { type: 'photo', id: '1', uri: 'https://example.com/photo.jpg' },
+  {
+    type: 'video',
+    id: '2',
+    uri: 'https://example.com/video.mp4',
+    posterUri: 'https://example.com/video-poster.jpg',
+  },
+];
+```
+
+**Without `renderVideo`, a `'video'` item just renders its `posterUri` image with a play-button icon overlaid — no actual playback.** `godieGodie` doesn't bundle a video player itself (that's a real native dependency, and picking one is your call) — provide `renderVideo` and it's called for every video item instead, with an `isActive` flag telling you whether it should currently be playing:
+
+```tsx
+import Video from 'react-native-video'; // your own choice of player
+import type { RenderVideoContext, VideoMediaItem } from 'godiegodie';
+
+function renderVideo(item: VideoMediaItem, { isActive }: RenderVideoContext) {
+  return (
+    <Video
+      source={{ uri: item.uri }}
+      style={{ width: '100%', height: '100%' }}
+      resizeMode="cover"
+      paused={!isActive}
+    />
+  );
+}
+
+<GodiePost media={media} comments={comments} renderVideo={renderVideo} />;
+```
+
+`isActive` is the entire autopause mechanism — `godieGodie` never calls `.pause()`/`.stop()` on your player itself, it only ever changes this boolean (true only when the video is both the carousel's current page *and* the post itself is visible — see `isVisible` below), and your `renderVideo` function reacts however makes sense for whatever player you're using. Tested end-to-end against `react-native-video` — see [`example/src/VideoRenderer.tsx`](./example/src/VideoRenderer.tsx) for the reference implementation, and `docs/ROADMAP.md` for which other players are still on the list to try.
+
+If you're rendering a **feed of multiple posts**, pass `isVisible={false}` when your own list scrolls a post out of view (e.g. from `FlatList`'s `onViewableItemsChanged`) so its video stops even though `GodiePost` has no way to detect that on its own. Defaults to `true`, so a single standalone post doesn't need to think about this.
 
 ## Customizing comment typography
 
@@ -84,10 +126,22 @@ const [donateModalVisible, setDonateModalVisible] = useState(false);
 
 Every comment can carry `replies` — single-level only, an Instagram-style flat thread (a reply never has replies of its own). They're hidden by default behind a "See N replies" toggle; once expanded, every reply renders at the same indentation, whether it's the 1st or the 34th.
 
-Each comment (and each reply) gets a "Reply" link. Tapping it opens an inline composer (a `TextInput` + Send/Cancel) built into the component. `GodiePost` never mutates your `comments` itself — when the user sends a reply, `onReplySubmit` fires with everything you need to build the new reply and update your own state:
+Each comment (and each reply) gets a "Reply" link — tapping it activates the fixed composer bar at the bottom (see below). `GodiePost` never mutates your `comments` itself; when the user sends a reply, `onReplySubmit` fires with everything you need to build the new reply and update your own state.
+
+## Comment composer bar (advanced mode)
+
+Pass `currentUser` (your logged-in user's `id`/`name`/`avatarUri`) and `GodiePost` renders a fixed comment bar at the bottom — an avatar-left, pill-shaped input with a send button, matching current Instagram. It's the single input for **both** writing a brand-new top-level comment and replying: tapping "Reply" on any comment/reply prefills `@name` and shows a small dismissible "Replying to {name}" banner above the bar; sending with no active reply calls `onCommentSubmit(text)`, sending while replying calls `onReplySubmit({ commentId, replyingToUserId, text })`.
 
 ```tsx
+const currentUser = { id: 'me', name: 'You', avatarUri: 'https://…' };
 const [comments, setComments] = useState(initialComments);
+
+function handleCommentSubmit(text) {
+  setComments((current) => [
+    ...current,
+    { id: `comment-${Date.now()}`, author: currentUser, text, createdAt: Date.now() },
+  ]);
+}
 
 function handleReplySubmit({ commentId, replyingToUserId, text }) {
   setComments((current) =>
@@ -100,7 +154,7 @@ function handleReplySubmit({ commentId, replyingToUserId, text }) {
               ...(comment.replies ?? []),
               {
                 id: `reply-${Date.now()}`,
-                author: currentUser, // whoever's logged in
+                author: currentUser,
                 text,
                 createdAt: Date.now(),
                 replyingToAuthorId: replyingToUserId,
@@ -111,8 +165,38 @@ function handleReplySubmit({ commentId, replyingToUserId, text }) {
   );
 }
 
-<GodiePost media={media} comments={comments} onReplySubmit={handleReplySubmit} />;
+<GodiePost
+  media={media}
+  comments={comments}
+  currentUser={currentUser}
+  onCommentSubmit={handleCommentSubmit}
+  onReplySubmit={handleReplySubmit}
+/>;
 ```
+
+Other notes:
+- Omit `currentUser` and the bar simply doesn't render — `GodiePost` is read-only, same as before this feature existed.
+- `composerEmojis` overrides the quick-pick emoji row shown while the input is focused (defaults to a small curated set); pass `[]` to hide it.
+- The bar automatically follows the system light/dark theme and floats above the keyboard on its own — it doesn't push your media or comments list around when it opens.
+- Multiline input grows up to a max height, then scrolls internally, same as the message box in most chat apps.
+- `closeOnSend` (default `true`) dismisses the keyboard right after a comment/reply is sent. Pass `false` if you'd rather keep it open for rapid back-to-back comments.
+
+## Theming (light/dark)
+
+The whole component — media area, comments list, and the composer bar — shares one background color, and text switches between black (light mode) and white (dark mode) automatically, detected via the device's own theme setting. You don't need to do anything for this to work correctly; it's on by default.
+
+If you want a background color other than the tested defaults (white in light mode, the same near-black Instagram itself uses in dark mode), pass your own:
+
+```tsx
+<GodiePost
+  media={media}
+  comments={comments}
+  backgroundColor="#ffffff"     // light mode
+  backgroundColorDark="#000000" // dark mode
+/>
+```
+
+Leave either one out and that mode falls back to the tested default — so a host that doesn't care about theming gets a correct-looking result with zero configuration. Text color isn't independently customizable yet (it's a simple black/white split tied to the resolved background) — ask if you need finer control.
 
 ## Layout: spacing and safe area
 
@@ -158,7 +242,7 @@ adb reverse tcp:8081 tcp:8081   # only needed over USB
 
 ## Docs
 
-See [`/docs`](./docs) for architecture and usage details.
+See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for how the component is built, and [`docs/ROADMAP.md`](./docs/ROADMAP.md) for what's planned but not finished yet (more video-player testing, "theater mode" comments).
 
 ## License
 
