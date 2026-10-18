@@ -160,7 +160,7 @@ export type GodiePostProps = {
    * `useColorScheme()` — no setup needed). Defaults to the same near-black
    * Instagram itself uses in dark mode. Text color isn't independently
    * customizable yet — it's a simple black (light mode) / white (dark mode)
-   * split; ask if you need finer control.
+   * split for now.
    */
   backgroundColorDark?: string;
   /**

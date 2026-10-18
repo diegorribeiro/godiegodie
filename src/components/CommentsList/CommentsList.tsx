@@ -46,11 +46,9 @@ export function CommentsList({
       contentContainerStyle={
         bottomInset ? { paddingBottom: bottomInset } : undefined
       }
-      // Explicit false: an Android-only FlatList behavior that has caused
-      // rows to become visually present but unresponsive to touch in the
-      // past. Default is already false on modern RN, but this is pinned
-      // deliberately now that rows contain independently-pressable
-      // action buttons.
+      // Explicit false: on Android, clipped subviews can leave rows visible
+      // but unresponsive to touch. Default is already false on modern RN,
+      // but it's pinned here because rows contain pressable action buttons.
       removeClippedSubviews={false}
       ListEmptyComponent={
         <View style={styles.empty}>

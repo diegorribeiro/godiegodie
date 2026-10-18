@@ -44,8 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // 10px gap with a 4px hitSlop on each button keeps adjacent hit areas
-  // from ever overlapping (gap > 2 * hitSlop) — see product-manager notes
-  // on comment-row click isolation.
+  // from ever overlapping (gap > 2 * hitSlop).
   row: {
     flexDirection: 'row',
     gap: 10,

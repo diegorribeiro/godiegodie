@@ -42,18 +42,23 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "comments",
+    "carousel",
+    "instagram",
+    "post",
+    "media"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diegoribeiro/godiegodie.git"
+    "url": "git+https://github.com/diegorribeiro/godiegodie.git"
   },
-  "author": "Diego Ribeiro <diegoribeiro.web@gmail.com> (https://github.com/diegoribeiro)",
+  "author": "Diego Ribeiro <diegoribeiro.web@gmail.com> (https://github.com/diegorribeiro)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/diegoribeiro/godiegodie/issues"
+    "url": "https://github.com/diegorribeiro/godiegodie/issues"
   },
-  "homepage": "https://github.com/diegoribeiro/godiegodie#readme",
+  "homepage": "https://github.com/diegorribeiro/godiegodie#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

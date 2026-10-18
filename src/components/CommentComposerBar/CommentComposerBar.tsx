@@ -28,7 +28,7 @@ export type CommentComposerBarProps = {
   replyTarget: CommentComposerTarget | null;
   emojis?: string[];
   bottomInset?: number;
-  /** Dismiss the keyboard automatically after sending. Defaults to `false`. */
+  /** Dismiss the keyboard automatically after sending. Defaults to `true`. */
   closeOnSend?: boolean;
   /** Reports the bar's own rendered height, so the comments list can reserve room for it. */
   onHeightChange?: (height: number) => void;
@@ -253,8 +253,7 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 10,
     gap: 6,
-    // Delimits the composer band from the comments scrolling above it —
-    // see docs/ARCHITECTURE.md, matched against a real Instagram screenshot.
+    // Delimits the composer band from the comments scrolling above it.
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   row: {

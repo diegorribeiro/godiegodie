@@ -5,7 +5,7 @@ Things that are planned/discussed but not built yet. See `ARCHITECTURE.md` for w
 ## Phase 3 — Pluggable video playback
 
 ### Status: architecture implemented, first player validated on-device
-The `renderVideo` render-slot design (host supplies the player, `GodiePost` supplies a correctly-sized, correctly-lifecycled slot) is built — see `docs/ARCHITECTURE.md` → "Video rendering" for the full design. Validated end-to-end on a physical Android tablet against `react-native-video`:
+The `renderVideo` render-slot design (host supplies the player, `GodiePost` supplies a correctly-sized, correctly-lifecycled slot) is built — see `docs/ARCHITECTURE.md` → "Video rendering" for the full design. Validated end-to-end on a physical Android device against `react-native-video`:
 - [x] Real playback works (`example/src/VideoRenderer.tsx`, native controls, progress bar advancing)
 - [x] Swiping the carousel away from the video slide flips its `isActive` to `false`
 - [x] Simulating "leaving the post" (`isVisible={false}`, via a manual toggle button in the example — a real feed would drive this from `FlatList.onViewableItemsChanged`) correctly pauses the video; returning resumes it

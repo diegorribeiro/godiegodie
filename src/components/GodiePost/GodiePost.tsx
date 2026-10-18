@@ -53,8 +53,8 @@ export function GodiePost({
         // are `position: relative` by default). MediaHeader/CommentsList are
         // never resized by the keyboard: MediaHeader has a fixed aspect ratio
         // that doesn't yield height, so letting the keyboard reflow this whole
-        // column (e.g. via KeyboardAvoidingView) previously squeezed the
-        // composer bar off-screen. Only the composer moves now.
+        // column (e.g. via KeyboardAvoidingView) would squeeze the composer
+        // bar off-screen. Only the composer moves.
       }
       <View
         style={[styles.container, { backgroundColor: theme.backgroundColor }]}

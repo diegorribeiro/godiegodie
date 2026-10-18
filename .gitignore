@@ -17,21 +17,16 @@ GoogleService-Info.plist
 google-services.json
 
 # =====================================================================
-# AI TOOL CONVERSATION / SESSION EXPORTS — must never be committed
-# (these can contain private chat history; some CLI tools auto-save
-# them straight into the project folder)
+# LOCAL TOOLING / EDITOR ASSISTANT FILES — personal, never committed
 # =====================================================================
-gemini-code-*.md
-claude-code-*.md
-*.chat.md
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.agent/
 .aider*
 .cursor/
-CLAUDE.local.md
-
-# Personal/local Claude Code settings (machine-specific permissions).
-***REMOVED***
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
+.gemini/
+*.chat.md
 
 # =====================================================================
 # NODE / BUILD

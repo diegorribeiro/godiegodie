@@ -48,10 +48,8 @@ const media: MediaItem[] = [
   {
     type: 'video',
     id: 'media-3',
-    // Google's own ExoPlayer test-media bucket — verified reachable (200)
-    // as of this writing, unlike some older public sample-video URLs
-    // (e.g. the old gtv-videos-bucket one, now 403). Horizontal (16:9),
-    // inside our fixed 1:1 media area (cover-fit crop).
+    // Public ExoPlayer sample clip. Horizontal (16:9), shown inside the
+    // fixed 1:1 media area with a cover-fit crop.
     uri: 'https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4',
     posterUri: 'https://picsum.photos/seed/godiegodie-3/800/800',
   },
@@ -137,8 +135,7 @@ const commentTypography: CommentTypography = {
 // the only row with a "pin" button, proving a button can be present on some
 // comments and absent on others. Both onPress handlers below are just
 // example actions — a real app would do something app-specific instead
-// (e.g. open a modal already on its own screen, like the "donate button"
-// example in the README).
+// (e.g. open a modal already on its own screen, navigate, call an API).
 const commentActions: CommentActionsConfig = {
   direction: 'row',
   buttons: (comment) => {

@@ -4,7 +4,22 @@ A dynamic React Native component: a fixed media header (photo/video/carousel) pl
 
 > 🚧 Work in progress — API not stable yet, not published to npm.
 >
-> A toggle between the media header and informational blocks/forms (mentioned in the original brief) is **not built yet** — v1 only covers the media case. See `docs/ARCHITECTURE.md` → "Known gaps" for the current state.
+> A toggle between the media header and informational blocks/forms is **not built yet** — v1 only covers the media case. See `docs/ARCHITECTURE.md` → "Known gaps" for the current state.
+
+## Demo
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/assets/carousel.gif" width="240" alt="Swiping the media carousel from photos to an auto-playing video" /></td>
+    <td align="center"><img src="docs/assets/replies.gif" width="240" alt="Expanding replies and replying to a comment from the composer bar" /></td>
+    <td align="center"><img src="docs/assets/composer.gif" width="240" alt="Writing a new comment with quick-pick emoji in dark mode" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Media carousel — the video plays only while it's the active slide</sub></td>
+    <td align="center"><sub>Replies — "See N replies" and replying from the fixed composer bar</sub></td>
+    <td align="center"><sub>New comment with quick-pick emoji, in dark mode</sub></td>
+  </tr>
+</table>
 
 ## Install
 
@@ -196,7 +211,7 @@ If you want a background color other than the tested defaults (white in light mo
 />
 ```
 
-Leave either one out and that mode falls back to the tested default — so a host that doesn't care about theming gets a correct-looking result with zero configuration. Text color isn't independently customizable yet (it's a simple black/white split tied to the resolved background) — ask if you need finer control.
+Leave either one out and that mode falls back to the tested default — so a host that doesn't care about theming gets a correct-looking result with zero configuration. Text color isn't independently customizable yet (it's a simple black/white split tied to the resolved background) — open an issue if you need finer control.
 
 ## Layout: spacing and safe area
 
