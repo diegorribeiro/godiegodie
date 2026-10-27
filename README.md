@@ -2,7 +2,7 @@
 
 A dynamic React Native component: a fixed media header (photo/video/carousel) plus a scrollable comments section below, with a fixed comment/reply composer bar — similar in spirit to an Instagram post.
 
-> 🚧 Work in progress — API not stable yet, not published to npm.
+> 🚧 Early version (0.x) — the API may still change between minor releases.
 >
 > A toggle between the media header and informational blocks/forms is **not built yet** — v1 only covers the media case. See `docs/ARCHITECTURE.md` → "Known gaps" for the current state.
 
