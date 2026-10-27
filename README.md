@@ -10,9 +10,9 @@ A dynamic React Native component: a fixed media header (photo/video/carousel) pl
 
 <table>
   <tr>
-    <td align="center"><img src="docs/assets/carousel.gif" width="240" alt="Swiping the media carousel from photos to an auto-playing video" /></td>
-    <td align="center"><img src="docs/assets/replies.gif" width="240" alt="Expanding replies and replying to a comment from the composer bar" /></td>
-    <td align="center"><img src="docs/assets/composer.gif" width="240" alt="Writing a new comment with quick-pick emoji in dark mode" /></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/diegorribeiro/godiegodie/master/docs/assets/carousel.gif" width="240" alt="Swiping the media carousel from photos to an auto-playing video" /></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/diegorribeiro/godiegodie/master/docs/assets/replies.gif" width="240" alt="Expanding replies and replying to a comment from the composer bar" /></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/diegorribeiro/godiegodie/master/docs/assets/composer.gif" width="240" alt="Writing a new comment with quick-pick emoji in dark mode" /></td>
   </tr>
   <tr>
     <td align="center"><sub>Media carousel — the video plays only while it's the active slide</sub></td>
